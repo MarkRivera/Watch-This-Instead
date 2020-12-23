@@ -1,22 +1,30 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
-const Users = require('../models/user-models');
-const { validateUserCreation } = require('../middleware/schemaValidation');
-const { userAlreadyExists, foundUser } = require('../middleware/users');
+const Users = require("../data/models/userModel");
+const { validateUserCreation } = require("../middleware/schemaValidation");
+const { userAlreadyExists, foundUser } = require("../middleware/users");
+const protectedRoute = require("../middleware/protected");
+const {
+  find,
+  findById,
+  add,
+  update,
+  remove,
+} = require("../data/models/userModel");
 
-router.get('/', async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
-    return res.json(await Users.getAllUsers());
+    return res.json(await Users.find());
   } catch (error) {
     next(error);
   }
 });
 
 router.post(
-  '/register',
+  "/register",
   validateUserCreation,
   userAlreadyExists,
   async (req, res, next) => {
@@ -33,7 +41,7 @@ router.post(
   }
 );
 
-router.post('/login', foundUser, async (req, res, next) => {
+router.post("/login", foundUser, async (req, res, next) => {
   try {
     const validPassword = await bcrypt.compare(
       req.body.password,
@@ -41,7 +49,7 @@ router.post('/login', foundUser, async (req, res, next) => {
     );
 
     if (!validPassword)
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Invalid credentials" });
 
     const token = await signToken(req.foundUser);
 
@@ -51,16 +59,22 @@ router.post('/login', foundUser, async (req, res, next) => {
   }
 });
 
+router.get("/profile", protectedRoute, async (req, res) => {
+  const user = await findById(req.token.user_id);
+  console.log(user);
+  return res.send("Found");
+});
+
 function signToken(user) {
   const payload = {
     user_id: user.id,
     email: user.email,
   };
 
-  const secret = process.env.JWT_SECRET || 'secretkey';
+  const secret = process.env.JWT_SECRET;
 
   const options = {
-    expiresIn: '1d',
+    expiresIn: "1d",
   };
 
   return jwt.sign(payload, secret, options);
