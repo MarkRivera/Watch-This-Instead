@@ -4,8 +4,13 @@ const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 const Users = require("../data/models/userModel");
+const {
+  generateUserGenreRelationship,
+} = require("../middleware/generateUserGenre");
 const { validateUserCreation } = require("../middleware/schemaValidation");
 const { userAlreadyExists, foundUser } = require("../middleware/users");
+const { createNewUser } = require("../middleware/createNewUser");
+
 const protectedRoute = require("../middleware/protected");
 const {
   find,
@@ -27,18 +32,8 @@ router.post(
   "/register",
   validateUserCreation,
   userAlreadyExists,
-  async (req, res, next) => {
-    try {
-      const newUser = await Users.add({
-        ...req.validUser,
-        password: bcrypt.hashSync(req.validUser.password, 12),
-      });
-
-      res.status(201).json(newUser);
-    } catch (error) {
-      next(error);
-    }
-  }
+  createNewUser,
+  generateUserGenreRelationship
 );
 
 router.post("/login", foundUser, async (req, res, next) => {

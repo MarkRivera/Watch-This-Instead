@@ -5,7 +5,7 @@ function find() {
 }
 
 function findById(id) {
-  return db("users").select("email").where({ id }).first();
+  return db("users").select("id", "email").where({ id }).first();
 }
 
 function add(user) {

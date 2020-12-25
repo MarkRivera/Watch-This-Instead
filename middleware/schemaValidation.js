@@ -1,9 +1,11 @@
-const Joi = require('@hapi/joi');
+const Joi = require("@hapi/joi");
 
 const userCreationSchema = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).required().trim(),
 
   password: Joi.string().min(8).required().trim(true),
+
+  genres: Joi.array().length(3).required(),
 });
 
 const validateUserCreation = async (req, res, next) => {
