@@ -5,14 +5,18 @@ exports.up = async function (knex) {
       .unsigned()
       .notNullable()
       .references("tmdbId")
-      .inTable("movies");
+      .inTable("movies")
+      .onUpdate("CASCADE")
+      .onDelete("CASCADE");
 
     table
       .integer("genreId")
       .unsigned()
       .notNullable()
       .references("tmdbId")
-      .inTable("genres");
+      .inTable("genres")
+      .onUpdate("CASCADE")
+      .onDelete("CASCADE");
 
     table.primary(["movieId", "genreId"]);
   });

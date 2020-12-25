@@ -6,14 +6,18 @@ exports.up = async function (knex) {
         .unsigned()
         .notNullable()
         .references("id")
-        .inTable("users");
+        .inTable("users")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE");
 
       table
         .integer("genreId")
         .unsigned()
         .notNullable()
         .references("tmdbId")
-        .inTable("genres");
+        .inTable("genres")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE");
 
       table.primary(["userId", "genreId"]);
     })
@@ -23,14 +27,18 @@ exports.up = async function (knex) {
         .unsigned()
         .notNullable()
         .references("id")
-        .inTable("users");
+        .inTable("users")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE");
 
       table
         .integer("movieId")
         .unsigned()
         .notNullable()
         .references("tmdbId")
-        .inTable("movies");
+        .inTable("movies")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE");
 
       table.primary(["userId", "movieId"]);
     })
@@ -41,14 +49,18 @@ exports.up = async function (knex) {
         .unsigned()
         .notNullable()
         .references("id")
-        .inTable("users");
+        .inTable("users")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE");
 
       table
         .integer("movieId")
         .unsigned()
         .notNullable()
         .references("tmdbId")
-        .inTable("movies");
+        .inTable("movies")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE");
 
       table.primary(["userId", "movieId"]);
     })
@@ -59,14 +71,18 @@ exports.up = async function (knex) {
         .unsigned()
         .notNullable()
         .references("id")
-        .inTable("users");
+        .inTable("users")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE");
 
       table
         .integer("movieId")
         .unsigned()
         .notNullable()
         .references("tmdbId")
-        .inTable("movies");
+        .inTable("movies")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE");
 
       table.primary(["userId", "movieId"]);
     });
