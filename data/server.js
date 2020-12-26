@@ -68,9 +68,9 @@ server.get("/", (req, res) => {
   }
 });
 
-server.use(function (req, res) {
-  res.status(404).send("Hmm... I can't seem to find what you're looking for");
-});
+// server.use(function (req, res) {
+//   res.status(404).send("Hmm... I can't seem to find what you're looking for");
+// });
 
 server.use((error, req, res, next) => {
   console.log(error);
