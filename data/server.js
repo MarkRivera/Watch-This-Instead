@@ -61,8 +61,16 @@ server.use("/status-check", (req, res) => {
   res.json({ message: "API up and running..." });
 });
 
+server.use("/", (req, res) => {
+  try {
+    res.status(200).send("Api is up and running!");
+  } catch (error) {
+    next(error);
+  }
+});
+
 server.use("/", (error, req, res) => {
-  if (process.env.DB_ENV !== "testing") console.log(error);
+  console.log(error);
   res.status(500).json({ error: "Something went wrong", stack: error.stack });
 });
 
