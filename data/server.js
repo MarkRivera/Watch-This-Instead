@@ -27,33 +27,31 @@ server.use(morgan("dev"));
 server.use("/api/users", UsersRouter);
 server.use("/api/movies", MoviesRouter);
 
-server.use(async function (req, res) {
+server.use(async function (req, res, next) {
   try {
     const genreUrl = `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.API_KEY}&language=en-US`;
+    // Get Genres Here:
+    const { data } = await axios.get(genreUrl);
+    const { genres } = data;
 
-    (async () => {
-      // Get Genres Here:
-      const { data } = await axios.get(genreUrl);
-      const { genres } = data;
+    // Check each genre and see if it exists in my database:
+    genres.forEach(async genre => {
+      const isInDatabase = await checkIfExists(genre.id);
 
-      // Check each genre and see if it exists in my database:
-      genres.forEach(async genre => {
-        const isInDatabase = await checkIfExists(genre.id);
+      if (isInDatabase.length === 0) {
+        // Create genre instance:
+        const currentGenre = genre.name;
 
-        if (isInDatabase.length === 0) {
-          // Create genre instance:
-          const currentGenre = genre.name;
+        const genreObject = {
+          tmdbId: genre.id,
+          genre: currentGenre,
+          totalNumberOfUsers: 0,
+        };
 
-          const genreObject = {
-            tmdbId: genre.id,
-            genre: currentGenre,
-            totalNumberOfUsers: 0,
-          };
-
-          add(genreObject, genre.id);
-        }
-      });
-    })();
+        add(genreObject, genre.id);
+      }
+    });
+    next();
   } catch (error) {
     console.error(error);
     next(error);
@@ -68,9 +66,9 @@ server.get("/", (req, res) => {
   }
 });
 
-// server.use(function (req, res) {
-//   res.status(404).send("Hmm... I can't seem to find what you're looking for");
-// });
+server.use(function (req, res) {
+  res.status(404).send("Hmm... I can't seem to find what you're looking for");
+});
 
 server.use((error, req, res, next) => {
   console.log(error);
