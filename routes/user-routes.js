@@ -263,6 +263,22 @@ router.get("/genre", isLoggedIn, async (req, res) => {
   }
 });
 
+// Update User - Genre Relationship in Database:
+router.put("/genre", isLoggedIn, async (req, res) => {
+  try {
+    const data = {
+      userId: req.token.user_id,
+      genreId: req.body.newGenreId,
+    };
+
+    await Users.updateUserGenre(req.token.user_id, req.body.oldId, data);
+
+    return res.status(200).json({ msg: "User Genre Updated" });
+  } catch (error) {
+    res.status(500).json({ msg: "Error occurred during update, sorry!" });
+  }
+});
+
 // Delete User - Genre Relationship in Database
 router.delete("/genre", isLoggedIn, async (req, res) => {
   try {
