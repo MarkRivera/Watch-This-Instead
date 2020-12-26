@@ -57,11 +57,7 @@ try {
 server.use("/api/users", UsersRouter);
 server.use("/api/movies", MoviesRouter);
 
-server.use("/status-check", (req, res) => {
-  res.json({ message: "API up and running..." });
-});
-
-server.use("/", (req, res) => {
+server.get("/", (req, res) => {
   try {
     res.status(200).send("Api is up and running!");
   } catch (error) {
@@ -69,7 +65,11 @@ server.use("/", (req, res) => {
   }
 });
 
-server.use("/", (error, req, res) => {
+server.use(function (req, res) {
+  res.status(404).send("Hmm... I can't seem to find what you're looking for");
+});
+
+server.use((error, req, res, next) => {
   console.log(error);
   res.status(500).json({ error: "Something went wrong", stack: error.stack });
 });
