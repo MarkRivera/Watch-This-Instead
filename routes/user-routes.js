@@ -295,6 +295,28 @@ router.delete("/genre", isLoggedIn, async (req, res) => {
   }
 });
 
+router.post("/verify", async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    if (!token) {
+      return res.status(400).json({ msg: "Invalid Token", token: null });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        res
+          .status(400)
+          .json({ msg: "Bad request, invalid token", token: null });
+      }
+
+      res.status(200).json({ msg: "User verified", token: decoded });
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
 // UTIL Functions
 
 function signToken(user) {
