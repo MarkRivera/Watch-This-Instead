@@ -15,7 +15,7 @@ async function findByTmdbId(id) {
 async function add(movie) {
   return await db("movies")
     .insert(movie)
-    .then(ids => findById(ids[0]));
+    .then(ids => findByTmdbId(ids[0]));
 }
 
 async function update(changes, id) {
