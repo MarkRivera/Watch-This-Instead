@@ -1,3 +1,6 @@
+var pg = require("pg");
+pg.defaults.ssl = true;
+
 module.exports = {
   development: {
     client: "sqlite3",
@@ -37,7 +40,7 @@ module.exports = {
   },
   production: {
     client: "pg",
-    connection: `${process.env.DATABASE_URL}sslmode=require`,
+    connection: process.env.DATABASE_URL,
     pool: {
       min: 2,
       max: 10,
