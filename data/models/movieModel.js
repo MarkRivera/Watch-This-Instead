@@ -16,7 +16,8 @@ async function add(movie) {
   console.log(movie);
   return await db("movies")
     .insert(movie)
-    .then(ids => findByTmdbId(ids[0]));
+    .then(ids => findByTmdbId(ids[0]))
+    .catch(error => console.error(error));
 }
 
 async function update(changes, id) {
