@@ -108,7 +108,6 @@ router.get("/", dashBoardLogin, async (req, res) => {
         };
 
         const addedMovie = await movieModel.add(schema);
-        console.log(addedMovie);
         return addedMovie;
       } else {
         // If they do set them in a list
