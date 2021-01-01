@@ -98,6 +98,7 @@ router.get("/", dashBoardLogin, async (req, res) => {
     // Check if these three movies exist in the database:
     const databaseMoviePromises = reducedMovieData.map(async movie => {
       const isInDatabase = await movieModel.findByTmdbId(movie.id);
+      console.log(movie);
       // If they don't add them and set them in a list:
       if (!isInDatabase) {
         const schema = {
@@ -119,8 +120,6 @@ router.get("/", dashBoardLogin, async (req, res) => {
       const results = await Promise.all(databaseMoviePromises);
       return results;
     })();
-
-    console.log(await threeMovies);
 
     // Send three movies to the client:
     res.status(200).json(await threeMovies);
