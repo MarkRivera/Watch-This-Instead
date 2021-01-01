@@ -7,6 +7,7 @@ const morgan = require("morgan");
 // Router
 const UsersRouter = require("../routes/user-routes");
 const MoviesRouter = require("../routes/movie-routes");
+const GenreRouter = require("../routes/genre-routes");
 
 // Models
 const {
@@ -57,6 +58,7 @@ server.use(async (req, res, next) => {
 
 server.use("/api/users", UsersRouter);
 server.use("/api/movies", MoviesRouter);
+server.use("/api/genres", GenreRouter);
 
 server.get("/", (req, res) => {
   try {

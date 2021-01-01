@@ -1,7 +1,7 @@
 const db = require("../dbConfig");
 
-function find() {
-  return db("genres");
+async function find() {
+  return await db("genres");
 }
 
 async function findByTmdbId(id) {
