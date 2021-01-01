@@ -120,6 +120,8 @@ router.get("/", dashBoardLogin, async (req, res) => {
       return results;
     })();
 
+    console.log(threeMovies);
+
     // Send three movies to the client:
     res.status(200).json(await threeMovies);
   } else {
