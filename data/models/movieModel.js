@@ -13,6 +13,7 @@ async function findByTmdbId(id) {
 }
 
 async function add(movie) {
+  console.log(movie);
   return await db("movies")
     .insert(movie)
     .then(ids => findByTmdbId(ids[0]));

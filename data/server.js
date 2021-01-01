@@ -24,10 +24,7 @@ server.use(cors());
 server.use(helmet());
 server.use(morgan("dev"));
 
-server.use("/api/users", UsersRouter);
-server.use("/api/movies", MoviesRouter);
-
-server.use(async function (req, res, next) {
+server.use(async (req, res, next) => {
   try {
     const genreUrl = `https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.API_KEY}&language=en-US`;
     // Get Genres Here:
@@ -57,6 +54,9 @@ server.use(async function (req, res, next) {
     next(error);
   }
 });
+
+server.use("/api/users", UsersRouter);
+server.use("/api/movies", MoviesRouter);
 
 server.get("/", (req, res) => {
   try {
