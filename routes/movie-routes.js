@@ -51,8 +51,9 @@ router.get("/", dashBoardLogin, async (req, res) => {
     })();
 
     let results = await queryResults;
+
     // Generate three random numbers for the page numbers we will query in the API
-    let maxNumOfPages = await results.map(result => result.data.total_pages);
+    let maxNumOfPages = results.map(result => result.data.total_pages);
 
     randomPages = randomPages.map((num, index) =>
       generateRandomNumber(maxNumOfPages[index])
@@ -90,7 +91,8 @@ router.get("/", dashBoardLogin, async (req, res) => {
       const randomNumber = generateRandomNumber(length);
       let movies = res.data.results;
 
-      return movies[randomNumber];
+      // Random number is normally indexed at 1, movies array is 0 indexed. Minus 1 from the random number so results don't become undefined if equal to 20
+      return movies[randomNumber - 1];
     });
 
     // Check if these three movies exist in the database:

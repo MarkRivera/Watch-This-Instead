@@ -9,7 +9,8 @@ async function findByTmdbId(id) {
 }
 
 async function findById(id) {
-  return await db("genres").where({ id }).first();
+  const item = await db("genres").where({ id }).first();
+  return item;
 }
 
 async function findByName(genre) {
