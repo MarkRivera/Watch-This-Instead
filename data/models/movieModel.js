@@ -16,7 +16,7 @@ async function add(movie) {
   console.log(movie);
   return await db("movies")
     .insert(movie)
-    .then(ids => console.log(ids))
+    .then(ids => console.log(ids[0]))
     .catch(error => console.error(error));
 }
 
