@@ -8,10 +8,9 @@ function findById(id) {
   return db("users").select("id", "email").where({ id }).first();
 }
 
-function add(user) {
-  return db("users")
-    .insert(user)
-    .then(ids => findById(ids[0]));
+async function add(user) {
+  const newUser = await db("users").insert(user);
+  return await db("users").where({ email: user.email }).first();
 }
 
 function update(changes, id) {
