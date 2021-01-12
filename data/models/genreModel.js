@@ -21,8 +21,8 @@ async function checkIfExists(id) {
   return await db("genres").where({ tmdbId: id });
 }
 
-function add(genre, tmdbId) {
-  return db("genres")
+async function add(genre, tmdbId) {
+  return await db("genres")
     .insert(genre)
     .then(id => findById(tmdbId));
 }
@@ -49,8 +49,8 @@ function remove(id) {
   return db("genres").where({ id }).del();
 }
 
-async function findUserGenre(id) {
-  return await db("user_genres").where({ id });
+async function findUserGenre(userId) {
+  return await db("user_genres").where({ userId });
 }
 
 async function addUserGenre(userId, genreId) {

@@ -1,25 +1,26 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
 
+// Router
 const router = express.Router();
-const Users = require("../data/models/userModel");
+
+// Middleware
 const {
   generateUserGenreRelationship,
 } = require("../middleware/generateUserGenre");
 const { validateUserCreation } = require("../middleware/schemaValidation");
 const { userAlreadyExists, foundUser } = require("../middleware/users");
 const { createNewUser } = require("../middleware/createNewUser");
-
 const protectedRoute = require("../middleware/protected");
-const {
-  find,
-  findById,
-  add,
-  update,
-  remove,
-} = require("../data/models/userModel");
 const isLoggedIn = require("../middleware/isLoggedIn");
+
+// Models
+const Users = require("../data/models/userModel");
+const { findUserGenre, findByTmdbId } = require("../data/models/genreModel");
+const { findByUserId } = require("../data/models/watchlistModel");
+const Movies = require("../data/models/movieModel");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -41,6 +42,10 @@ router.post(
   generateUserGenreRelationship
 );
 
+// READ
+// POST 200 OK
+// LOGIN USER
+
 router.post("/login", foundUser, async (req, res, next) => {
   try {
     const validPassword = await bcrypt.compare(
@@ -51,9 +56,119 @@ router.post("/login", foundUser, async (req, res, next) => {
     if (!validPassword)
       return res.status(401).json({ message: "Invalid credentials" });
 
-    const token = signToken(req.foundUser);
+    // Get User's Genres and Lists:
 
-    res.status(200).json({ token });
+    // Fetching Genres
+    const userGenres = await findUserGenre(req.foundUser.id);
+    const genreDataPromise = userGenres.map(async ({ userId, genreId }) => {
+      const { tmdbId, genre, totalNumberOfUsers } = await findByTmdbId(genreId);
+      return {
+        genre: {
+          genreId: tmdbId,
+          genre,
+          totalNumberOfUsers,
+        },
+      };
+    });
+
+    const resolveGenreDataPromise = (async () => {
+      const results = await Promise.all(genreDataPromise);
+      return results;
+    })();
+
+    const genreData = await resolveGenreDataPromise;
+
+    // Fetching Watch List
+    const userWatchList = await findByUserId(req.foundUser.id);
+    const watchListPromise = userWatchList.map(async ({ userId, movieId }) => {
+      try {
+        const data = await Movies.findByTmdbId(movieId);
+
+        // Fetch filepaths for movie posters
+        const query = await axios.get(
+          `https://api.themoviedb.org/3/movie/${movieId}/images?api_key=${process.env.API_KEY}`
+        );
+
+        const url =
+          query.data.posters.length > 0
+            ? query.data.posters[0].file_path
+            : null;
+
+        return {
+          movieId: data.tmdbId,
+          title: data.title,
+          year: data.year,
+          desc: data.description,
+          posterPath: url
+            ? `https://image.tmdb.org/t/p/w300_and_h450_bestv2${url}`
+            : null, // full poster path
+        };
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+          msg: "There was an error while fetching your user watch list",
+        });
+      }
+    });
+
+    const resolveUserWatchListPromise = (async () => {
+      const results = await Promise.all(watchListPromise);
+      return results;
+    })();
+
+    const watchList = await resolveUserWatchListPromise;
+
+    // Fetch Favorites
+    const favorites = await Users.readUserMovies(req.foundUser.id);
+    const favoritesPromise = favorites.map(async ({ userId, movieId }) => {
+      try {
+        const data = await Movies.findByTmdbId(movieId);
+
+        // Fetch filepaths for movie posters
+        const query = await axios.get(
+          `https://api.themoviedb.org/3/movie/${movieId}/images?api_key=${process.env.API_KEY}`
+        );
+        const url =
+          query.data.posters.length > 0
+            ? query.data.posters[0].file_path
+            : null;
+
+        return {
+          movieId: data.tmdbId,
+          title: data.title,
+          year: data.year,
+          desc: data.description,
+          posterPath: url
+            ? `https://image.tmdb.org/t/p/w300_and_h450_bestv2${url}`
+            : null, // full poster path
+        };
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+          msg: "There was an error while fetching your favorites movies list",
+        });
+      }
+    });
+
+    const resolveFavoritesPromise = (async () => {
+      const results = await Promise.all(favoritesPromise);
+      return results;
+    })();
+
+    const userFavorites = await resolveFavoritesPromise;
+
+    // Sign token, send user data
+    const token = signToken(req.foundUser);
+    res.status(200).json({
+      token,
+      user: {
+        email: req.foundUser.email,
+        id: req.foundUser.id,
+        genres: genreData,
+        watchlist: watchList,
+        favorites: userFavorites,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -84,7 +199,7 @@ router.delete("/", isLoggedIn, async (req, res) => {
 });
 
 router.get("/profile", protectedRoute, async (req, res) => {
-  const user = await findById(req.token.user_id);
+  const user = await Users.findById(req.token.user_id);
   console.log(user);
   return res.send("Found");
 });
