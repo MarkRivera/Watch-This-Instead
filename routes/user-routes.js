@@ -63,11 +63,9 @@ router.post("/login", foundUser, async (req, res, next) => {
     const genreDataPromise = userGenres.map(async ({ userId, genreId }) => {
       const { tmdbId, genre, totalNumberOfUsers } = await findByTmdbId(genreId);
       return {
-        genre: {
-          genreId: tmdbId,
-          genre,
-          totalNumberOfUsers,
-        },
+        genreId: tmdbId,
+        genre,
+        totalNumberOfUsers,
       };
     });
 
