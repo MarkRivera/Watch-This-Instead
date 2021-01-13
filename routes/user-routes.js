@@ -155,6 +155,45 @@ router.post("/login", foundUser, async (req, res, next) => {
 
     const userFavorites = await resolveFavoritesPromise;
 
+    // WATCHED MOVIES
+    const watched = await Users.readUserWatched(req.foundUser.id);
+    const watchedPromise = watched.map(async ({ userId, movieId }) => {
+      try {
+        const data = await Movies.findByTmdbId(movieId);
+
+        // Fetch filepaths for movie posters
+        const query = await axios.get(
+          `https://api.themoviedb.org/3/movie/${movieId}/images?api_key=${process.env.API_KEY}`
+        );
+        const url =
+          query.data.posters.length > 0
+            ? query.data.posters[0].file_path
+            : null;
+
+        return {
+          movieId: data.tmdbId,
+          title: data.title,
+          year: data.year,
+          desc: data.description,
+          posterPath: url
+            ? `https://image.tmdb.org/t/p/w300_and_h450_bestv2${url}`
+            : null, // full poster path
+        };
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+          msg: "There was an error while fetching your watched movies list",
+        });
+      }
+    });
+
+    const resolveWatchedPromise = (async () => {
+      const results = await Promise.all(watchedPromise);
+      return results;
+    })();
+
+    const userWatched = await resolveWatchedPromise;
+
     // Sign token, send user data
     const token = signToken(req.foundUser);
     res.status(200).json({
@@ -165,6 +204,7 @@ router.post("/login", foundUser, async (req, res, next) => {
         genres: genreData,
         watchlist: watchList,
         favorites: userFavorites,
+        watched: userWatched,
       },
     });
   } catch (error) {
